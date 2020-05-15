@@ -180,6 +180,7 @@ typedef enum {
     LOGXENT,
     L2NORM,
     EMPTY,
+    VIEW,
     BLANK
 } LAYER_TYPE;
 

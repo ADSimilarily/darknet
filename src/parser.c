@@ -28,6 +28,7 @@
 #include "region_layer.h"
 #include "reorg_layer.h"
 #include "reorg_old_layer.h"
+#include "view_layer.h"
 #include "rnn_layer.h"
 #include "route_layer.h"
 #include "shortcut_layer.h"
@@ -78,6 +79,7 @@ LAYER_TYPE string_to_layer_type(char * type)
         || strcmp(type, "[local_avgpool]") == 0) return LOCAL_AVGPOOL;
     if (strcmp(type, "[reorg3d]")==0) return REORG;
     if (strcmp(type, "[reorg]") == 0) return REORG_OLD;
+    if (strcmp(type, "[view]") == 0) return VIEW;
     if (strcmp(type, "[avg]")==0
             || strcmp(type, "[avgpool]")==0) return AVGPOOL;
     if (strcmp(type, "[dropout]")==0) return DROPOUT;
@@ -745,6 +747,26 @@ layer parse_reorg_old(list *options, size_params params)
     return layer;
 }
 
+layer parse_view(list *options, size_params params)
+{
+    int batch, h, w, c;
+    batch = params.batch;
+    h = params.h;
+    w = params.w;
+    c = params.c;
+
+    int out_h = option_find_int(options, "height", h);
+    int out_w = option_find_int(options, "width", w);
+    int out_c = option_find_int(options, "channel", c);
+
+    assert(h*w*c==out_h*out_w*out_c);
+
+    if (!(h && w && c)) error("Layer before view layer must output image.");
+
+    layer layer = make_view_layer(batch, w, h, c, out_w, out_h, out_c);
+    return layer;
+}
+
 maxpool_layer parse_local_avgpool(list *options, size_params params)
 {
     int stride = option_find_int(options, "stride", 1);
@@ -1349,6 +1371,8 @@ network parse_network_cfg_custom(char *filename, int batch, int time_steps)
             l = parse_reorg(options, params);        }
         else if (lt == REORG_OLD) {
             l = parse_reorg_old(options, params);
+        }else if(lt == VIEW){
+            l = parse_view(options, params);
         }else if(lt == AVGPOOL){
             l = parse_avgpool(options, params);
         }else if(lt == ROUTE){

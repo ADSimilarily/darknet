@@ -436,6 +436,13 @@ __global__ void reorg_kernel(int N, float *x, int w, int h, int c, int batch, in
     //else out[0] = x[0];
 }
 
+__global__ void view_kernel(int N, float *x, int w, int h, int c, int batch, float *out)
+{
+    int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
+    if(i >= N) return;
+    out[i] = x[i];
+}
+
 __global__ void constrain_weight_updates_kernel(int N, float coef, float *weights_gpu, float *weight_updates_gpu)
 {
     int i = (blockIdx.x + blockIdx.y*gridDim.x) * blockDim.x + threadIdx.x;
@@ -799,6 +806,13 @@ extern "C" void reorg_ongpu(float *x, int w, int h, int c, int batch, int stride
 {
     int size = w*h*c*batch;
     reorg_kernel<<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream()>>>(size, x, w, h, c, batch, stride, forward, out);
+    CHECK_CUDA(cudaPeekAtLastError());
+}
+
+extern "C" void view_ongpu(float *x, int w, int h, int c, int batch, float *out)
+{
+    int size = w*h*c*batch;
+    view_kernel<<<cuda_gridsize(size), BLOCK, 0, get_cuda_stream()>>>(size, x, w, h, c, batch, out);
     CHECK_CUDA(cudaPeekAtLastError());
 }
 

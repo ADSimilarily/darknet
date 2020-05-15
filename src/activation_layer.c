@@ -52,12 +52,18 @@ void backward_activation_layer(layer l, network_state state)
 void forward_activation_layer_gpu(layer l, network_state state)
 {
     copy_ongpu(l.outputs*l.batch, state.input, 1, l.output_gpu, 1);
-    activate_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation);
+    if (l.activation == NORM_CHAN_SOFTMAX || l.activation == NORM_CHAN_SOFTMAX_MAXVAL)
+        activate_array_normalize_channels_softmax_ongpu(l.output_gpu, l.outputs*l.batch, l.batch, l.out_c, l.out_w*l.out_h, l.output_gpu, 1);
+    else
+        activate_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation);
 }
 
 void backward_activation_layer_gpu(layer l, network_state state)
 {
-    gradient_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation, l.delta_gpu);
+    if (l.activation == NORM_CHAN_SOFTMAX || l.activation == NORM_CHAN_SOFTMAX_MAXVAL)
+        gradient_array_normalize_channels_softmax_ongpu(l.output_gpu, l.outputs*l.batch, l.batch, l.out_c, l.out_w*l.out_h, l.delta_gpu);
+    else
+        gradient_array_ongpu(l.output_gpu, l.outputs*l.batch, l.activation, l.delta_gpu);
     copy_ongpu(l.outputs*l.batch, l.delta_gpu, 1, state.delta, 1);
 }
 #endif

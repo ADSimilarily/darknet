@@ -26,6 +26,7 @@
 #include "maxpool_layer.h"
 #include "reorg_layer.h"
 #include "reorg_old_layer.h"
+#include "view_layer.h"
 #include "avgpool_layer.h"
 #include "cost_layer.h"
 #include "softmax_layer.h"
@@ -203,6 +204,8 @@ char *get_layer_string(LAYER_TYPE a)
             return "maxpool";
         case REORG:
             return "reorg";
+        case VIEW:
+            return "view";
         case AVGPOOL:
             return "avgpool";
         case SOFTMAX:
@@ -581,6 +584,8 @@ int resize_network(network *net, int w, int h)
             resize_reorg_layer(&l, w, h);
         } else if (l.type == REORG_OLD) {
             resize_reorg_old_layer(&l, w, h);
+        }else if(l.type == VIEW){
+            resize_view_layer(&l, w, h);
         }else if(l.type == AVGPOOL){
             resize_avgpool_layer(&l, w, h);
         }else if(l.type == NORMALIZATION){

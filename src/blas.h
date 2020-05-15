@@ -114,6 +114,7 @@ void weighted_sum_gpu(float *a, float *b, float *s, int num, float *c);
 void mult_add_into_gpu(int num, float *a, float *b, float *c);
 
 void reorg_ongpu(float *x, int w, int h, int c, int batch, int stride, int forward, float *out);
+void view_ongpu(float *x, int w, int h, int c, int batch, float *out);
 
 void softmax_gpu_new_api(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output);
 void softmax_gpu(float *input, int n, int offset, int groups, float temp, float *output);
