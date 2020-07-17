@@ -19,8 +19,8 @@ layer make_yolo_layer(int batch, int w, int h, int n, int total, int *mask, int 
     layer l = { (LAYER_TYPE)0 };
     l.type = YOLO;
 
-    l.n = n;
-    l.total = total;
+    l.n = n;          // 单个cell中bbox的个数
+    l.total = total;  // anchors的总数目
     l.batch = batch;
     l.h = h;
     l.w = w;
@@ -43,7 +43,7 @@ layer make_yolo_layer(int batch, int w, int h, int n, int total, int *mask, int 
     l.inputs = l.outputs;
     l.max_boxes = max_boxes;
     l.truths = l.max_boxes*(4 + 1);    // 90*(4 + 1);
-    l.delta = (float*)xcalloc(batch * l.outputs, sizeof(float));
+    l.delta = (float*)xcalloc(batch * l.outputs, sizeof(float));    // outputs按梯度下降更新，所以 delta = - dF/dx
     l.output = (float*)xcalloc(batch * l.outputs, sizeof(float));
     for(i = 0; i < total*2; ++i){
         l.biases[i] = .5;
@@ -623,9 +623,9 @@ void forward_yolo_layer(const layer l, network_state state)
     classification_loss /= l.batch;
     iou_loss /= l.batch;
 
-    fprintf(stderr, "v3 (%s loss, Normalizer: (iou: %.2f, cls: %.2f) Region %d Avg (IOU: %f, GIOU: %f), Class: %f, Obj: %f, No Obj: %f, .5R: %f, .75R: %f, count: %d, class_loss = %f, iou_loss = %f, total_loss = %f \n",
+    fprintf(stderr, "v3 (%s loss, Normalizer: (iou: %.2f, cls: %.2f) Region %d Avg (IOU: %f, GIOU: %f), Class: %f, Obj: %f, No Obj: %f, .5R: %f, .75R: %f, count: %d, class_loss = %f, (iou_loss = %f, avg_iou_loss = %f), total_loss = %f \n",
         (l.iou_loss == MSE ? "mse" : (l.iou_loss == GIOU ? "giou" : "iou")), l.iou_normalizer, l.cls_normalizer, state.index, tot_iou / count, tot_giou / count, avg_cat / class_count, avg_obj / count, avg_anyobj / (l.w*l.h*l.n*l.batch), recall / count, recall75 / count, count,
-        classification_loss, iou_loss, loss);
+        classification_loss, iou_loss, avg_iou_loss, loss);
 }
 
 void backward_yolo_layer(const layer l, network_state state)

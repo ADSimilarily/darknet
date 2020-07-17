@@ -134,7 +134,9 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
     net.num_boxes = args.num_boxes;
     net.train_images_num = train_images_num;
     args.d = &buffer;
-    args.type = DETECTION_DATA;
+    if (net.orient) {args.type = ORIENT_DATA;}
+    else
+        args.type = DETECTION_DATA;
     args.threads = 64;    // 16 or 64
 
     args.angle = net.angle;
@@ -338,14 +340,17 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
             //network net_combined = combine_train_valid_networks(net, net_map);
 
             iter_map = iteration;
-            mean_average_precision = validate_detector_map(datacfg, cfgfile, weightfile, 0.25, 0.5, 0, net.letter_box, &net_map);// &net_combined);
-            printf("\n mean_average_precision (mAP@0.5) = %f \n", mean_average_precision);
-            if (mean_average_precision > best_map) {
-                best_map = mean_average_precision;
-                printf("New best mAP!\n");
-                char buff[256];
-                sprintf(buff, "%s/%s_best.weights", backup_directory, base);
-                save_weights(net, buff);
+            if (args.type != ORIENT_DATA)
+            {
+                mean_average_precision = validate_detector_map(datacfg, cfgfile, weightfile, 0.25, 0.5, 0, net.letter_box, &net_map);// &net_combined);
+                printf("\n mean_average_precision (mAP@0.5) = %f \n", mean_average_precision);
+                if (mean_average_precision > best_map) {
+                    best_map = mean_average_precision;
+                    printf("New best mAP!\n");
+                    char buff[256];
+                    sprintf(buff, "%s/%s_best.weights", backup_directory, base);
+                    save_weights(net, buff);
+                }
             }
 
             draw_precision = 1;
@@ -360,7 +365,7 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
 
         //if (i % 1000 == 0 || (i < 1000 && i % 100 == 0)) {
         //if (i % 100 == 0) {
-        if (iteration >= (iter_save + 1000) || iteration % 1000 == 0) {
+        if (iteration >= (iter_save + 1000) || iteration % 1000 == 0 || (iteration < 1000 && iteration % 100 == 0)) {
             iter_save = iteration;
 #ifdef GPU
             if (ngpus != 1) sync_nets(nets, ngpus, 0);

@@ -1,0 +1,10 @@
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/install/strip.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/install/local.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/install.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/uselib_track.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/list_install_components.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/dark.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/uselib.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/edit_cache.dir
+/media/cobot/00006784000048232/yolov4/darknet/cmake-build-debug/CMakeFiles/darknet.dir

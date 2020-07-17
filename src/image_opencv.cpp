@@ -352,6 +352,20 @@ image mat_to_image_cv(mat_cv *mat)
     return mat_to_image(*(cv::Mat*)mat);
 }
 
+image draw_orient_box(image ai, int left, int right, int top, int bot, int a1, int a2, int a3, int a4)
+{
+    cv::Mat orient_image = image_to_mat(ai);
+    cv::Point points[1][4];
+    points[0][0] = cv::Point(left + a1, top);
+    points[0][1] = cv::Point(right, top + a2);
+    points[0][2] = cv::Point(right - a3, bot);
+    points[0][3] = cv::Point(left, bot - a4);
+    const cv::Point* pts[] = {points[0]};
+    int npts[] = {4};
+    cv::polylines(orient_image, pts, npts, 1, true, cv::Scalar(0, 255, 0), 1, 8, 0);
+    return mat_to_image(orient_image);
+}
+
 // ====================================================================
 // Window
 // ====================================================================
@@ -1153,7 +1167,7 @@ extern "C" void draw_train_loss(char *windows_name, mat_cv* img_src, int img_siz
 extern "C" image image_data_augmentation(mat_cv* mat, int w, int h,
     int pleft, int ptop, int swidth, int sheight, int flip,
     float dhue, float dsat, float dexp,
-    int gaussian_noise, int blur, int num_boxes, float *truth)
+    int gaussian_noise, int blur, int num_boxes, float *truth, int orient)
 {
     image out;
     try {
@@ -1243,7 +1257,9 @@ extern "C" image image_data_augmentation(mat_cv* mat, int w, int h,
                 cv::Rect img_rect(0, 0, sized.cols, sized.rows);
                 int t;
                 for (t = 0; t < num_boxes; ++t) {
-                    box b = float_to_box_stride(truth + t*(4 + 1), 1);
+                    box b;
+                    if (orient) {b = float_to_box_stride(truth + t*(4 + 5 + 1), 1);}
+                    else b = float_to_box_stride(truth + t*(4 + 1), 1);
                     if (!b.x) break;
                     int left = (b.x - b.w / 2.)*sized.cols;
                     int width = b.w*sized.cols;

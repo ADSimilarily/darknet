@@ -37,6 +37,7 @@
 #include "sam_layer.h"
 #include "yolo_layer.h"
 #include "gaussian_yolo_layer.h"
+#include "oriented_yolo_layer.h"
 #include "upsample_layer.h"
 #include "parser.h"
 
@@ -218,6 +219,8 @@ char *get_layer_string(LAYER_TYPE a)
             return "yolo";
         case GAUSSIAN_YOLO:
             return "Gaussian_yolo";
+        case ORIENTED_YOLO:
+            return "oriented_yolo";
         case DROPOUT:
             return "dropout";
         case CROP:
@@ -560,6 +563,8 @@ int resize_network(network *net, int w, int h)
             resize_yolo_layer(&l, w, h);
         }else if (l.type == GAUSSIAN_YOLO) {
             resize_gaussian_yolo_layer(&l, w, h);
+        }else if(l.type == ORIENTED_YOLO) {
+            resize_oriented_yolo_layer(&l, w, h);
         }else if(l.type == ROUTE){
             resize_route_layer(&l, net);
         }else if (l.type == SHORTCUT) {
@@ -743,6 +748,9 @@ int num_detections(network *net, float thresh)
         if (l.type == GAUSSIAN_YOLO) {
             s += gaussian_yolo_num_detections(l, thresh);
         }
+        if (l.type == ORIENTED_YOLO) {
+            s += oriented_yolo_num_detections(l, thresh);
+        }
         if (l.type == DETECTION || l.type == REGION) {
             s += l.w*l.h*l.n;
         }
@@ -777,6 +785,7 @@ detection *make_network_boxes(network *net, float thresh, int *num)
         dets[i].prob = (float*)xcalloc(l.classes, sizeof(float));
         // tx,ty,tw,th uncertainty
         if(l.type == GAUSSIAN_YOLO) dets[i].uc = (float*)xcalloc(4, sizeof(float)); // Gaussian_YOLOv3
+        else if(l.type == ORIENTED_YOLO)  dets[i].uc = (float*)xcalloc(5, sizeof(float));  // oriented_yolo
         if (l.coords > 4) {
             dets[i].mask = (float*)xcalloc(l.coords - 4, sizeof(float));
         }
@@ -837,6 +846,15 @@ void fill_network_boxes(network *net, int w, int h, float thresh, float hier, in
             else if (prev_classes != l.classes) {
                 printf(" Error: Different [yolo] layers have different number of classes = %d and %d - check your cfg-file! \n",
                     prev_classes, l.classes);
+            }
+        }
+        if (l.type == ORIENTED_YOLO) {
+            int count = get_oriented_yolo_detections(l, w, h, net->w, net->h, thresh, map, relative, dets, letter);
+            dets += count;
+            if (prev_classes < 0) prev_classes = l.classes;
+            else if (prev_classes != l.classes) {
+                printf(" Error: Different [oriented_yolo] layers have different number of classes = %d and %d - check your cfg-file! \n",
+                       prev_classes, l.classes);
             }
         }
         if (l.type == GAUSSIAN_YOLO) {

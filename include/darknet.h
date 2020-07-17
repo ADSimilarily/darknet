@@ -173,6 +173,7 @@ typedef enum {
     REGION,
     YOLO,
     GAUSSIAN_YOLO,
+    ORIENTED_YOLO,
     ISEG,
     REORG,
     REORG_OLD,
@@ -386,6 +387,7 @@ struct layer {
     float scale_x_y;
     int objectness_smooth;
     float max_delta;
+    float sigma_squared;
     float uc_normalizer;
     float iou_normalizer;
     float cls_normalizer;
@@ -725,6 +727,7 @@ typedef struct network {
     int init_sequential_subdivisions;
     int current_subdivision;
     int try_fix_nan;
+    int orient;
 
     int gpu_index;
     tree *hierarchy;
@@ -807,6 +810,11 @@ typedef struct box {
 } box;
 
 // box.h
+typedef struct orient_box {
+    float a1, a2, a3, a4, r;
+} orient_box;
+
+// box.h
 typedef struct boxabs {
     float left, right, top, bot;
 } boxabs;
@@ -860,7 +868,7 @@ typedef struct data {
 
 // data.h
 typedef enum {
-    CLASSIFICATION_DATA, DETECTION_DATA, CAPTCHA_DATA, REGION_DATA, IMAGE_DATA, COMPARE_DATA, WRITING_DATA, SWAG_DATA, TAG_DATA, OLD_CLASSIFICATION_DATA, STUDY_DATA, DET_DATA, SUPER_DATA, LETTERBOX_DATA, REGRESSION_DATA, SEGMENTATION_DATA, INSTANCE_DATA, ISEG_DATA
+    CLASSIFICATION_DATA, DETECTION_DATA, ORIENT_DATA, CAPTCHA_DATA, REGION_DATA, IMAGE_DATA, COMPARE_DATA, WRITING_DATA, SWAG_DATA, TAG_DATA, OLD_CLASSIFICATION_DATA, STUDY_DATA, DET_DATA, SUPER_DATA, LETTERBOX_DATA, REGRESSION_DATA, SEGMENTATION_DATA, INSTANCE_DATA, ISEG_DATA
 } data_type;
 
 // data.h
@@ -916,6 +924,12 @@ typedef struct box_label {
     float x, y, w, h;
     float left, right, top, bottom;
 } box_label;
+
+typedef struct orient_box_label {
+    int id;
+    float x, y, w, h, a1, a2, a3, a4, r;
+    float left, right, top, bottom;
+} orient_box_label;
 
 // list.h
 //typedef struct node {

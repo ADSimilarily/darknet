@@ -28,6 +28,16 @@ box float_to_box_stride(float *f, int stride)
     return b;
 }
 
+orient_box float_to_orient_box_stride(float *f, int stride)
+{
+    orient_box b = { 0 };
+    b.a1 = f[0];
+    b.a2 = f[1 * stride];
+    b.a3 = f[2 * stride];
+    b.a4 = f[3 * stride];
+    b.r = f[4 * stride];
+    return b;
+}
 
 dbox derivative(box a, box b)
 {

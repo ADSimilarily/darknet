@@ -44,6 +44,7 @@ void release_mat(mat_cv **mat);
 // Mat image_to_mat(image img)
 // image mat_to_image(cv::Mat mat)
 image mat_to_image_cv(mat_cv *mat);
+image draw_orient_box(image ai, int left, int right, int top, int bot, int a1, int a2, int a3, int a4);
 
 // Window
 void create_window_cv(char const* window_name, int full_screen, int width, int height);
@@ -100,7 +101,7 @@ void draw_train_loss(char *windows_name, mat_cv* img, int img_size, float avg_lo
 image image_data_augmentation(mat_cv* mat, int w, int h,
     int pleft, int ptop, int swidth, int sheight, int flip,
     float dhue, float dsat, float dexp,
-    int gaussian_noise, int blur, int num_boxes, float *truth);
+    int gaussian_noise, int blur, int num_boxes, float *truth, int orient);
 
 // blend two images with (alpha and beta)
 void blend_images_cv(image new_img, float alpha, image old_img, float beta);
