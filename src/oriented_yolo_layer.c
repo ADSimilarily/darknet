@@ -523,7 +523,7 @@ void forward_oriented_yolo_layer(const layer l, network_state state)
                         const float class_multiplier = (l.classes_multipliers) ? l.classes_multipliers[class_id] : 1.0f;
                         if (l.objectness_smooth) l.delta[class_index + stride*class_id] = class_multiplier * (iou_multiplier - l.output[class_index + stride*class_id]);
                         box truth = float_to_box_stride(state.truth + best_t*(4 + 5 + 1) + b*l.truths, 1);
-                        delta_oriented_yolo_box(truth, l.output, l.biases, l.mask[n], box_index, i, j, l.w, l.h, state.net.w, state.net.h, l.delta, (2 - truth.w*truth.h), l.w*l.h, l.iou_normalizer * class_multiplier, l.iou_loss, 1, l.max_delta);
+                        delta_oriented_yolo_box(truth, l.output, l.biases, l.mask[n], box_index, i, j, l.w, l.h, state.net.w, state.net.h, l.delta, (2 - truth.w*truth.h), l.w*l.h, l.iou_normalizer * class_multiplier, l.iou_loss, 1, l.max_delta, l.sigma_squared);
                         orient_box orient_truth = float_to_orient_box_stride(state.truth + best_t*(4 + 5 + 1) + b*l.truths + 4, 1);
                         delta_yolo_orient(orient_truth, l.output, l.delta, orient_index, l.w*l.h, l.uc_normalizer, l.sigma_squared);
                     }
@@ -567,7 +567,7 @@ void forward_oriented_yolo_layer(const layer l, network_state state)
 
                 int box_index = entry_oriented_index(l, b, mask_n*l.w*l.h + j*l.w + i, 0);
                 const float class_multiplier = (l.classes_multipliers) ? l.classes_multipliers[class_id] : 1.0f;
-                ious all_ious = delta_oriented_yolo_box(truth, l.output, l.biases, best_n, box_index, i, j, l.w, l.h, state.net.w, state.net.h, l.delta, (2 - truth.w*truth.h), l.w*l.h, l.iou_normalizer * class_multiplier, l.iou_loss, 1, l.max_delta);
+                ious all_ious = delta_oriented_yolo_box(truth, l.output, l.biases, best_n, box_index, i, j, l.w, l.h, state.net.w, state.net.h, l.delta, (2 - truth.w*truth.h), l.w*l.h, l.iou_normalizer * class_multiplier, l.iou_loss, 1, l.max_delta, l.sigma_squared);
 
                 // range is 0 <= 1
                 tot_iou += all_ious.iou;
@@ -617,7 +617,7 @@ void forward_oriented_yolo_layer(const layer l, network_state state)
 
                         int box_index = entry_oriented_index(l, b, mask_n*l.w*l.h + j*l.w + i, 0);
                         const float class_multiplier = (l.classes_multipliers) ? l.classes_multipliers[class_id] : 1.0f;
-                        ious all_ious = delta_oriented_yolo_box(truth, l.output, l.biases, n, box_index, i, j, l.w, l.h, state.net.w, state.net.h, l.delta, (2 - truth.w*truth.h), l.w*l.h, l.iou_normalizer * class_multiplier, l.iou_loss, 1, l.max_delta);
+                        ious all_ious = delta_oriented_yolo_box(truth, l.output, l.biases, n, box_index, i, j, l.w, l.h, state.net.w, state.net.h, l.delta, (2 - truth.w*truth.h), l.w*l.h, l.iou_normalizer * class_multiplier, l.iou_loss, 1, l.max_delta, l.sigma_squared);
 
                         // range is 0 <= 1
                         tot_iou += all_ious.iou;
