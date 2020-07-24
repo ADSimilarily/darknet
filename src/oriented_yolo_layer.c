@@ -723,17 +723,18 @@ void forward_oriented_yolo_layer(const layer l, network_state state)
     float avg_iou_loss = 0;
     // gIOU loss + MSE (objectness) loss
     if (l.iou_loss == MSE) {
+        avg_iou_loss = count > 0 ? l.iou_normalizer * (tot_giou_loss / count) : 0;
         *(l.cost) = pow(mag_array(l.delta, l.outputs * l.batch), 2);
     }
     else {
         // Always compute classification loss both for iou + cls loss and for logging with mse loss
         // TODO: remove IOU loss fields before computing MSE on class
         //   probably split into two arrays
-        if (l.iou_loss == GIOU) {
-            avg_iou_loss = count > 0 ? l.iou_normalizer * (tot_giou_loss / count) : 0;
+        if (l.iou_loss == CIOU) {
+            avg_iou_loss = count > 0 ? l.iou_normalizer * (tot_ciou_loss / count) : 0;
         }
         else {
-            avg_iou_loss = count > 0 ? l.iou_normalizer * (tot_iou_loss / count) : 0;
+            avg_iou_loss = count > 0 ? l.iou_normalizer * (tot_giou_loss / count) : 0;
         }
         *(l.cost) = avg_iou_loss + classification_loss + avg_orient_loss;
     }
